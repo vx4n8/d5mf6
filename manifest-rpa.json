@@ -1,0 +1,22 @@
+{
+  "name": "RPA Flight Operations Checklist",
+  "short_name": "RPA Checklist",
+  "description": "RPA Flight Operations Checklist by Patrice Roblin",
+  "start_url": "/rpa-checklist.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23ffffff'/><text x='14' y='130' style='font-size:120px;font-weight:300;fill:%23111;font-family:sans-serif;'>R</text><text x='96' y='130' style='font-size:120px;font-weight:300;fill:%230099FF;font-family:sans-serif;'>K</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23ffffff'/><text x='30' y='360' style='font-size:320px;font-weight:300;fill:%23111;font-family:sans-serif;'>R</text><text x='256' y='360' style='font-size:320px;font-weight:300;fill:%230099FF;font-family:sans-serif;'>K</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

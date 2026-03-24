@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REKON — RPA Flight Operations Checklist</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RPA Checklist">
+<link rel="manifest" href="manifest-rpa.json">
+<style>
+:root{
+  --blue:#0099FF;--blue-light:#e0f2ff;--blue-mid:#b8ddf8;
+  --bg:#f5f7fa;--white:#ffffff;--text:#111111;
+  --muted:#666666;--hint:#888888;
+  --border:#e0e8f0;--field-bg:#f0f4f8;--field-border:#d0dae8;
+  --danger:#c0392b;--danger-bg:#fdf0f0;--danger-border:#f5c6c6;
+  --success:#1a8048;--success-bg:#e8f7ee;--success-border:#a8dbbe;
+  --accent:#f0a500;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-weight:400;min-height:100vh;}
+/* HEADER */
+header{background:var(--white);padding:24px 40px 0 52px;display:flex;flex-direction:column;}
+header::before{display:none;}
+.logo-wrap{flex-shrink:0;padding-bottom:14px;}
+.logo-wrap svg{width:100%;height:auto;max-height:68px;}
+.header-blue-line{height:1.5px;background:var(--blue);margin:0 -52px 0 -52px;}
+/* SURVEY TITLE */
+.survey-title-bar{background:var(--white);padding:13px 40px;border-bottom:1px solid var(--border);text-align:center;}
+.survey-title-bar h2{font-size:13px;font-weight:500;color:var(--text);letter-spacing:0.1em;text-transform:uppercase;}
+/* MAIN */
+main{max-width:860px;margin:0 auto;padding:20px 20px 60px;}
+/* EDITION LABEL */
+.edition-label{font-size:11px;color:var(--blue);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;padding-left:2px;}
+/* LOADER */
+.loader-panel{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px;}
+.loader-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.loader-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:6px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.15s;border:1px solid;font-family:inherit;flex:1 1 140px;min-width:0;text-align:center;}
+.loader-btn.new{background:var(--blue);color:var(--white);border-color:var(--blue);}
+.loader-btn.new:hover{background:#0088ee;}
+.loader-btn.load{background:transparent;color:var(--text);border-color:var(--border);}
+.loader-btn.load:hover,.loader-btn.load.active{background:var(--field-bg);border-color:var(--blue);}
+.loader-list{margin-top:14px;}
+.saved-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 14px;background:var(--field-bg);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;}
+.saved-row.active{border-color:var(--success-border);background:var(--success-bg);}
+.saved-row.active .saved-name{color:var(--success);}
+.saved-info{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;}
+.saved-name{font-size:0.92rem;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.saved-meta{font-size:0.75rem;color:var(--muted);}
+.saved-actions{display:flex;gap:7px;flex-shrink:0;}
+.saved-btn{padding:5px 13px;border-radius:5px;font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all 0.13s;border:1px solid;font-family:inherit;}
+.saved-btn.load{border-color:var(--blue-mid);background:var(--blue-light);color:var(--blue);}
+.saved-btn.load:hover{background:var(--blue-mid);}
+.saved-btn.del{border-color:var(--danger-border);background:var(--danger-bg);color:var(--danger);}
+.saved-btn.del:hover{background:#f9d5d5;}
+/* PROGRESS */
+.progress-wrap{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px 20px;margin-bottom:12px;display:flex;align-items:center;gap:16px;}
+.progress-label{font-size:0.78rem;color:var(--blue);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;}
+.progress-track{flex:1;height:4px;background:var(--blue-light);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--blue);border-radius:2px;transition:width 0.4s;width:0%;}
+.progress-pct{font-size:0.95rem;font-weight:600;color:var(--blue);min-width:36px;text-align:right;}
+/* SECTIONS */
+.section{background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;}
+.section-header{background:var(--white);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;}
+.section-header.collapsible{cursor:pointer;user-select:none;}
+.section-header.collapsible:hover{background:var(--field-bg);}
+.section-num{background:var(--blue-light);color:#0077cc;font-weight:700;font-size:0.8rem;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:0.85rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);}
+.section-tag{margin-left:auto;font-size:0.7rem;color:var(--hint);letter-spacing:0.1em;text-transform:uppercase;}
+.collapse-icon{margin-left:auto;color:var(--hint);font-size:1rem;transition:transform 0.25s;flex-shrink:0;line-height:1;}
+.section-tag+.collapse-icon{margin-left:10px;}
+.section.collapsed .collapse-icon{transform:rotate(-90deg);}
+.section-body{padding:20px;}
+.section.collapsed .section-body{display:none;}
+/* FIELDS */
+.sub-label{font-size:0.75rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.sub-label:first-child{margin-top:0;}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field-grid.triple{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field.full{grid-column:1/-1;}
+label{font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=number],textarea,select{background:var(--field-bg);border:1px solid var(--field-border);border-radius:5px;color:var(--text);font-family:inherit;font-size:0.92rem;padding:9px 13px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;width:100%;}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,153,255,0.1);}
+textarea{resize:none;min-height:70px;overflow:hidden;}
+select option{background:var(--white);color:var(--text);}
+input[type=date]::-webkit-calendar-picker-indicator,input[type=time]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:0.5;}
+.section-notes{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+.section-notes label{display:block;margin-bottom:6px;}
+.section-notes textarea{min-height:64px;font-size:0.88rem;}
+/* YES/NO */
+.yn-list{display:flex;flex-direction:column;}
+.yn-item{border-bottom:1px solid var(--border);}
+.yn-item:last-child{border-bottom:none;}
+.yn-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 12px;background:var(--white);transition:background 0.15s;}
+.yn-row:hover{background:var(--field-bg);}
+.yn-question{font-size:0.88rem;color:var(--text);flex:1;line-height:1.4;}
+.yn-btns{display:flex;gap:6px;flex-shrink:0;}
+.yn-btn{padding:4px 13px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.8rem;font-weight:600;letter-spacing:0.08em;cursor:pointer;transition:all 0.13s;font-family:inherit;}
+.yn-btn:hover{border-color:var(--blue);color:var(--blue);}
+.yn-btn.yes{background:var(--success-bg);border-color:var(--success-border);color:var(--success);}
+.yn-btn.no{background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger);}
+/* CHECKLIST ITEMS */
+.check-list{display:flex;flex-direction:column;}
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background 0.15s;}
+.check-item:last-child{border-bottom:none;}
+.check-item:hover{background:var(--field-bg);}
+.check-box{width:20px;height:20px;min-width:20px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:background 0.15s,border-color 0.15s;flex-shrink:0;}
+.check-item.checked .check-box{background:var(--blue);border-color:var(--blue);}
+.check-item.checked .check-box::after{content:'';display:block;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);}
+.check-item.checked .check-label{color:var(--muted);text-decoration:line-through;}
+.check-label{font-size:0.88rem;line-height:1.45;flex:1;color:var(--text);}
+/* INPUT ITEMS */
+.input-item{padding:10px 0;border-bottom:1px solid var(--border);}
+.input-item:last-child{border-bottom:none;}
+.input-item label{font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:5px;}
+.input-item input,.input-item textarea{width:100%;background:var(--field-bg);border:1px solid var(--field-border);border-radius:5px;color:var(--text);font-family:inherit;font-size:0.92rem;padding:9px 13px;outline:none;transition:border-color 0.2s;}
+.input-item input:focus,.input-item textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,153,255,0.1);}
+.input-item textarea{min-height:70px;resize:none;overflow:hidden;}
+/* RISK ASSESSMENT */
+.risk-block{background:var(--field-bg);border:1px solid var(--border);border-radius:7px;padding:16px;margin-bottom:14px;}
+.risk-block:last-child{margin-bottom:0;}
+.risk-block-title{font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.risk-row{margin-bottom:10px;}
+.risk-row:last-child{margin-bottom:0;}
+.risk-row label{font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;}
+.risk-row input,.risk-row textarea,.risk-row select{width:100%;background:var(--white);border:1px solid var(--field-border);border-radius:5px;color:var(--text);font-family:inherit;font-size:0.88rem;padding:8px 11px;outline:none;}
+.risk-row textarea{min-height:60px;resize:none;overflow:hidden;}
+.risk-row input:focus,.risk-row textarea:focus,.risk-row select:focus{border-color:var(--blue);}
+.risk-level-row{display:flex;gap:10px;margin-top:8px;}
+.risk-level-row>div{flex:1;}
+.risk-badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:0.7rem;font-weight:700;margin-top:4px;}
+.risk-low{background:#e8f7ee;color:var(--success);}
+.risk-medium{background:#fff8e0;color:#b87d00;}
+.risk-high{background:var(--danger-bg);color:var(--danger);}
+.risk-extreme{background:#3d0a0a;color:#ff8a80;}
+/* CANVAS SKETCH */
+.sketch-wrap{margin-bottom:8px;}
+.sketch-label{font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:6px;}
+.sketch-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;padding:8px;background:var(--field-bg);border-radius:8px;border:1px solid var(--border);}
+.sketch-btn{padding:6px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--text);cursor:pointer;transition:all 0.15s;font-family:inherit;}
+.sketch-btn:active,.sketch-btn.active{background:var(--blue);color:var(--white);border-color:var(--blue);}
+.sketch-btn.danger{background:var(--danger-bg);color:var(--danger);border-color:var(--danger-border);}
+.sketch-color-row{display:flex;gap:5px;align-items:center;}
+.sketch-color{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;}
+.sketch-color.active{border-color:#fff;box-shadow:0 0 0 2px var(--blue);}
+.sketch-size{font-size:0.72rem;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.sketch-size input[type=range]{width:60px;}
+.sketch-canvas{border:1px solid var(--border);border-radius:8px;background:#fff;cursor:crosshair;display:block;touch-action:none;width:100%!important;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.sketch-note{font-size:0.7rem;color:var(--muted);margin-top:4px;font-style:italic;}
+.sketch-maps-link{display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--blue);text-decoration:none;padding:5px 10px;border:1.5px solid var(--blue-mid);border-radius:6px;margin-bottom:8px;font-weight:600;background:var(--blue-light);}
+.sketch-maps-link:hover{background:var(--blue-mid);}
+/* MAP / WEATHER BUTTONS */
+.map-weather-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.ext-link-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:6px;font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;border:1px solid;text-decoration:none;font-family:inherit;}
+.ext-link-btn.maps{background:var(--blue-light);color:var(--blue);border-color:var(--blue-mid);}
+.ext-link-btn.maps:hover{background:var(--blue-mid);}
+.ext-link-btn.windy{background:#e8f7ee;color:var(--success);border-color:var(--success-border);}
+.ext-link-btn.windy:hover{background:var(--success-border);}
+/* BUTTONS */
+.action-wrap{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:36px;margin-bottom:40px;}
+.btn-gold{background:var(--blue);color:var(--white);font-size:1rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border:none;padding:14px 32px;border-radius:7px;cursor:pointer;transition:background 0.2s;font-family:inherit;}
+.btn-gold:hover{background:#0088ee;}
+.btn-outline{background:transparent;color:var(--blue);font-size:1rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border:1px solid var(--blue-mid);padding:13px 32px;border-radius:7px;cursor:pointer;transition:all 0.2s;font-family:inherit;}
+.btn-outline:hover{background:var(--blue-light);border-color:var(--blue);}
+/* SAVE */
+.save-section{background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;}
+.save-section .section-header{background:var(--white);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;}
+.save-section .section-body{padding:20px;}
+/* FOOTER */
+footer{text-align:center;padding:22px 20px;color:var(--hint);font-size:0.75rem;letter-spacing:0.05em;border-top:1px solid var(--border);background:var(--white);}
+.footer-inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;}
+.footer-inner a{display:inline-flex;align-items:center;gap:4px;color:var(--hint);text-decoration:none;transition:color 0.2s;}
+.footer-inner a:hover{color:var(--blue);}
+.footer-sep{opacity:0.4;}
+@media(max-width:600px){
+  .field-grid,.field-grid.triple{grid-template-columns:1fr;}
+  header{padding:16px 20px 0;}
+  .header-blue-line{margin:0 -20px;}
+  .survey-title-bar{padding:12px 20px;}
+  main{padding:16px 14px 60px;}
+  .yn-row{flex-wrap:wrap;gap:8px;}
+  .yn-btns{width:100%;justify-content:flex-start;}
+  .loader-btns{flex-direction:column;}
+  .loader-btn{width:100%;min-width:0;flex:none;}
+  .risk-level-row{flex-direction:column;}
+}
+@media print{
+  body{background:white!important;color:#000;}
+  header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .action-wrap,.loader-panel,.progress-wrap{display:none!important;}
+  .section.collapsed .section-body{display:block!important;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <svg width="100%" viewBox="0 0 900 100" xmlns="http://www.w3.org/2000/svg">
+      <text x="14" y="82" style="font-size:88px;font-weight:300;fill:#111;font-family:sans-serif;">R</text>
+      <text x="84" y="82" style="font-size:88px;font-weight:300;fill:#111;font-family:sans-serif;">E</text>
+      <text x="196" y="82" text-anchor="middle" style="font-size:88px;font-weight:300;fill:#0099FF;font-family:sans-serif;">K</text>
+      <text x="248" y="82" style="font-size:88px;font-weight:300;fill:#111;font-family:sans-serif;">O</text>
+      <text x="324" y="82" style="font-size:88px;font-weight:300;fill:#111;font-family:sans-serif;">N</text>
+      <text x="396" y="88" style="font-size:14px;font-weight:400;fill:#999999;font-family:sans-serif;">©</text>
+      <line x1="420" y1="14" x2="420" y2="90" stroke="#ccc" stroke-width="1"/>
+      <text x="434" y="52" style="font-size:15px;font-weight:400;fill:#888;font-family:sans-serif;letter-spacing:0.14em;">RPA CHECKLIST,</text>
+      <text x="434" y="76" style="font-size:15px;font-weight:400;fill:#0099FF;font-family:sans-serif;letter-spacing:0.14em;">REDESIGNED</text>
+    </svg>
+  </div>
+  <div class="header-blue-line"></div>
+</header>
+
+<div class="survey-title-bar">
+  <h2>RPA Flight Operations — Checklist</h2>
+</div>
+
+<main>
+  <div class="edition-label">Remotely Piloted Aircraft Edition</div>
+
+  <!-- LOADER -->
+  <div class="loader-panel" id="loaderPanel">
+    <div class="loader-btns">
+      <button class="loader-btn new" onclick="newMission()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Mission
+      </button>
+      <button class="loader-btn load" id="btnLoadMission" onclick="toggleLoader()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Load Mission
+      </button>
+      <button class="loader-btn load" onclick="document.getElementById('importInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import Mission
+      </button>
+      <input type="file" id="importInput" accept=".json,.rpa" style="display:none" onchange="importMission(this)">
+    </div>
+    <div class="loader-list" id="loaderList" style="display:none;"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <span class="progress-label">Completion</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+
+  <!-- SEC 0: MISSION DETAILS -->
+  <div class="section" id="sec0">
+    <div class="section-header collapsible" onclick="toggleSection('sec0')">
+      <div class="section-num">0</div>
+      <div class="section-title">Mission Details</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="field-grid">
+        <div class="field full"><label>Mission Name</label><input type="text" id="f_missionName" placeholder="e.g. Bridge Inspection — Site A" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Location</label><input type="text" id="f_location" placeholder="e.g. Brisbane River, QLD" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Client</label><input type="text" id="f_client" placeholder="Client or organisation name" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Date</label><input type="date" id="f_date" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Pilot in Command</label><input type="text" id="f_pilot" placeholder="Pilot name" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Crew Members</label><input type="text" id="f_crew" placeholder="e.g. Observer: J. Smith, VO: K. Lee" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Aircraft / RPA ID</label><input type="text" id="f_aircraft" placeholder="e.g. DJI M300 — Serial 12345" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Task / Job Reference</label><input type="text" id="f_taskRef" placeholder="Job reference number" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Pre-Mission Notes</label><textarea id="f_missionNotes" placeholder="Any pre-mission notes…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+      </div>
+      <!-- MAP & WEATHER BUTTONS -->
+      <div class="map-weather-row">
+        <a id="mapsBtn" class="ext-link-btn maps" href="#" target="_blank" onclick="openMaps(event)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Open in Google Maps
+        </a>
+        <a id="windyBtn" class="ext-link-btn windy" href="#" target="_blank" onclick="openWindy(event)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></svg>
+          Check Weather — Windy
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 1: PILOT LOG -->
+  <div class="section collapsed" id="sec1">
+    <div class="section-header collapsible" onclick="toggleSection('sec1')">
+      <div class="section-num">1</div>
+      <div class="section-title">Pilot Log</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Flight Record</div>
+      <div class="field-grid">
+        <div class="field"><label>Aircraft</label><input type="text" id="pl_aircraft" placeholder="Aircraft type / ID" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Pilot in Command</label><input type="text" id="pl_pilot" placeholder="Pilot name" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Crew</label><input type="text" id="pl_crew" placeholder="Crew members and roles" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Route / Remarks</label><textarea id="pl_route" placeholder="Flight route and remarks…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+        <div class="field"><label>Skill Rating (0–3)</label><input type="text" id="pl_skill" placeholder="0 = novice, 3 = expert" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Wind (Kp Index)</label><input type="text" id="pl_windKp" placeholder="e.g. Kp 2" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Wind Speed at 10m</label><input type="text" id="pl_windSpeed" placeholder="e.g. 15 km/h" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Gusts at 10m</label><input type="text" id="pl_gusts" placeholder="e.g. 25 km/h" oninput="triggerAutosave()"></div>
+        <div class="field"><label>RPA Registration #</label><input type="text" id="pl_rpaReg" placeholder="Registration number" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Battery #</label><input type="text" id="pl_battery" placeholder="Battery ID / serial" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Flight Hours (This Flight)</label><input type="text" id="pl_flightHours" placeholder="e.g. 0h 45m" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Total Hours (Running Total)</label><input type="text" id="pl_totalHours" placeholder="e.g. 124h 30m" oninput="triggerAutosave()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 2: PRE-OP BRIEFING -->
+  <div class="section collapsed" id="sec2">
+    <div class="section-header collapsible" onclick="toggleSection('sec2')">
+      <div class="section-num">2</div>
+      <div class="section-title">Pre-Op Briefing</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">RPAS Pre-Operational Briefing</div>
+      <div class="input-item"><label>Mission Objectives</label><textarea id="pb_objectives" placeholder="Describe mission objectives…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+      <div class="input-item"><label>Proximity to Airfield</label><input type="text" id="pb_airfield" placeholder="e.g. 5.2km NE of Archerfield Airport" oninput="triggerAutosave()"></div>
+      <div class="input-item"><label>Site Based Threats / Risks</label><textarea id="pb_threats" placeholder="List site-specific threats and risks…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+      <div class="input-item"><label>Weather Forecast</label><textarea id="pb_weather" placeholder="Forecast conditions for mission day…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+      <div class="input-item"><label>Craft to Be Used</label><input type="text" id="pb_craft" placeholder="Aircraft type and specification" oninput="triggerAutosave()"></div>
+      <div class="input-item"><label>Limits of the Craft</label><textarea id="pb_limits" placeholder="Operational limits: wind, rain, temp, altitude…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+      <div class="input-item"><label>Emergency Landing Areas</label><textarea id="pb_emergencyLanding" placeholder="Identified emergency landing zones…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+      <div class="input-item"><label>Emergency Contacts</label><textarea id="pb_emergencyContacts" placeholder="Key contacts and numbers…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- SEC 3: JOB SAFETY ASSESSMENT -->
+  <div class="section collapsed" id="sec3">
+    <div class="section-header collapsible" onclick="toggleSection('sec3')">
+      <div class="section-num">3</div>
+      <div class="section-title">Job Safety Assessment</div>
+      <span class="section-tag">Yes / No</span>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Site Assessment</div>
+      <div class="yn-list" id="yn_jsa"></div>
+      <div class="section-notes"><label>JSA Notes</label><textarea id="n_jsa" placeholder="Additional safety observations…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- SEC 4: MISSION CHECKLIST -->
+  <div class="section collapsed" id="sec4">
+    <div class="section-header collapsible" onclick="toggleSection('sec4')">
+      <div class="section-num">4</div>
+      <div class="section-title">Mission Checklist</div>
+      <span class="section-tag">Tick all completed</span>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Before the Day of Flight</div>
+      <div class="check-list" id="cl_beforeDay"></div>
+      <div class="sub-label" style="margin-top:20px;">Immediately Before Flight</div>
+      <div class="check-list" id="cl_beforeFlight"></div>
+      <div class="sub-label" style="margin-top:20px;">Take Off</div>
+      <div class="check-list" id="cl_takeoff"></div>
+      <div class="section-notes"><label>Mission Notes</label><textarea id="n_mission" placeholder="Any mission-specific notes…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- SEC 5: JSA WITH MAP & SITE MAPPING -->
+  <div class="section collapsed" id="sec5">
+    <div class="section-header collapsible" onclick="toggleSection('sec5')">
+      <div class="section-num">5</div>
+      <div class="section-title">JSA with Map &amp; Site Mapping</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Site Assessment</div>
+      <div class="yn-list" id="yn_jsaMap"></div>
+
+      <div class="sub-label" style="margin-top:20px;">Site Conditions</div>
+      <div class="field-grid">
+        <div class="field"><label>NOTAMs</label><input type="text" id="jm_notams" placeholder="NOTAM reference" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Wind Speed</label><input type="text" id="jm_wind" placeholder="e.g. 18 km/h" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Gusts</label><input type="text" id="jm_gusts" placeholder="e.g. 28 km/h" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Temperature</label><input type="text" id="jm_temp" placeholder="e.g. 24°C" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Permissions</label><input type="text" id="jm_permissions" placeholder="Approvals obtained" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Closest Aerodrome</label><input type="text" id="jm_aerodrome" placeholder="Name and distance" oninput="triggerAutosave()"></div>
+      </div>
+
+      <div class="sub-label" style="margin-top:20px;">Site Map Sketch</div>
+      <div id="sketchContainer"></div>
+
+      <div class="field-grid" style="margin-top:14px;">
+        <div class="field full"><label>Warning Signs Location</label><input type="text" id="jm_signs" placeholder="Where signs are placed" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Uncrossable Physical Barriers</label><input type="text" id="jm_barriers" placeholder="Barrier locations" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Marked Exclusion Zones</label><input type="text" id="jm_exclusion" placeholder="Exclusion zone description" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Flight Travel Path Description</label><textarea id="jm_flightPath" placeholder="Describe planned flight path…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+        <div class="field full"><label>Aerial Work Path Description</label><textarea id="jm_workPath" placeholder="Describe aerial work area…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+        <div class="field"><label>Take-Off / Landing Location</label><input type="text" id="jm_toLanding" placeholder="TO/LDG location" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Spotter Position(s)</label><input type="text" id="jm_spotter" placeholder="Spotter positions" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Obstructions</label><textarea id="jm_obstructions" placeholder="List obstructions…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+        <div class="field"><label>Public Access Points</label><input type="text" id="jm_publicAccess" placeholder="Entry / exit points" oninput="triggerAutosave()"></div>
+        <div class="field"><label>Emergency Landing Location</label><input type="text" id="jm_emergLanding" placeholder="Emergency LDG site" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Key Hazard Locations</label><textarea id="jm_hazards" placeholder="Hazard locations and types…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+        <div class="field"><label>Safe Zone Location</label><input type="text" id="jm_safeZone" placeholder="Safe zone position" oninput="triggerAutosave()"></div>
+        <div class="field full"><label>Additional Site Notes</label><textarea id="jm_siteNotes" placeholder="Additional notes…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEC 6: RISK ASSESSMENT -->
+  <div class="section collapsed" id="sec6">
+    <div class="section-header collapsible" onclick="toggleSection('sec6')">
+      <div class="section-num">6</div>
+      <div class="section-title">Risk Assessment</div>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div id="riskBlocks"></div>
+    </div>
+  </div>
+
+  <!-- SEC 7: CREW INDUCTION -->
+  <div class="section collapsed" id="sec7">
+    <div class="section-header collapsible" onclick="toggleSection('sec7')">
+      <div class="section-num">7</div>
+      <div class="section-title">Crew Induction</div>
+      <span class="section-tag">Tick all completed</span>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">The Mission</div>
+      <div class="check-list" id="cl_crewMission"></div>
+      <div class="sub-label" style="margin-top:20px;">Safety</div>
+      <div class="check-list" id="cl_crewSafety"></div>
+      <div class="sub-label" style="margin-top:20px;">Communication</div>
+      <div class="check-list" id="cl_crewComms"></div>
+      <div class="section-notes"><label>Induction Notes</label><textarea id="n_crew" placeholder="Additional induction notes…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- SEC 8: PRE-FLIGHT INSPECTION -->
+  <div class="section collapsed" id="sec8">
+    <div class="section-header collapsible" onclick="toggleSection('sec8')">
+      <div class="section-num">8</div>
+      <div class="section-title">Pre-Flight Inspection</div>
+      <span class="section-tag">Tick all completed</span>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Site &amp; Safety</div>
+      <div class="check-list" id="cl_pfSite"></div>
+      <div class="sub-label" style="margin-top:20px;">Propellers</div>
+      <div class="check-list" id="cl_pfProps"></div>
+      <div class="sub-label" style="margin-top:20px;">Motors</div>
+      <div class="check-list" id="cl_pfMotors"></div>
+      <div class="sub-label" style="margin-top:20px;">Frame</div>
+      <div class="check-list" id="cl_pfFrame"></div>
+      <div class="sub-label" style="margin-top:20px;">Undercarriage</div>
+      <div class="check-list" id="cl_pfUndercarriage"></div>
+      <div class="sub-label" style="margin-top:20px;">Battery</div>
+      <div class="check-list" id="cl_pfBattery"></div>
+      <div class="sub-label" style="margin-top:20px;">Transmitter</div>
+      <div class="check-list" id="cl_pfTransmitter"></div>
+      <div class="sub-label" style="margin-top:20px;">Payload (if fitted)</div>
+      <div class="check-list" id="cl_pfPayload"></div>
+      <div class="section-notes"><label>Pre-Flight Notes</label><textarea id="n_preflight" placeholder="Any pre-flight observations…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- SEC 9: POST-FLIGHT -->
+  <div class="section collapsed" id="sec9">
+    <div class="section-header collapsible" onclick="toggleSection('sec9')">
+      <div class="section-num">9</div>
+      <div class="section-title">Post-Flight</div>
+      <span class="section-tag">Tick all completed</span>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Upon Landing</div>
+      <div class="check-list" id="cl_postLanding"></div>
+      <div class="sub-label" style="margin-top:20px;">In the Office</div>
+      <div class="check-list" id="cl_postOffice"></div>
+      <div class="sub-label" style="margin-top:20px;">Post-Flight Inspection — Propellers</div>
+      <div class="check-list" id="cl_postProps"></div>
+      <div class="sub-label" style="margin-top:20px;">Post-Flight Inspection — Motors</div>
+      <div class="check-list" id="cl_postMotors"></div>
+      <div class="sub-label" style="margin-top:20px;">Post-Flight Inspection — Frame &amp; Battery</div>
+      <div class="check-list" id="cl_postFrame"></div>
+      <div class="section-notes"><label>Post-Flight Notes</label><textarea id="n_postflight" placeholder="Any post-flight observations…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- SEC 10: POST-CRASH -->
+  <div class="section collapsed" id="sec10">
+    <div class="section-header collapsible" onclick="toggleSection('sec10')">
+      <div class="section-num">10</div>
+      <div class="section-title">Post-Crash</div>
+      <span class="section-tag">If incident occurs</span>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Post-Crash Procedure</div>
+      <div class="check-list" id="cl_crashProcedure"></div>
+      <div class="sub-label" style="margin-top:20px;">Re-Booting</div>
+      <div class="check-list" id="cl_crashReboot"></div>
+      <div class="section-notes"><label>Incident Notes</label><textarea id="n_crash" placeholder="Describe the incident, damage assessment, actions taken…" oninput="autoResize(this);triggerAutosave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- SAVE -->
+  <div class="save-section">
+    <div class="section-header"><div class="section-num" style="font-size:1rem;">&#9733;</div><div class="section-title">Save</div></div>
+    <div class="section-body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div class="field" style="flex:1;min-width:200px;"><label>Mission Name</label><input type="text" id="saveName" placeholder="e.g. Bridge Inspection — Site A"></div>
+        <button id="btnSave" class="btn-gold" style="padding:10px 24px;font-size:0.9rem;white-space:nowrap;flex-shrink:0;" onclick="saveMission()">Save Mission</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-wrap">
+    <button class="btn-gold" onclick="exportMission()">Export / Share</button>
+    <button class="btn-outline" onclick="generateReport()">Print / PDF Report</button>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>&copy; 2026 Patrice Roblin</span><span class="footer-sep">|</span>
+    <a href="tel:0402096781">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      +61 0402 096 781
+    </a><span class="footer-sep">|</span>
+    <a href="mailto:roblinpatrice@gmail.com">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+      roblinpatrice@gmail.com
+    </a><span class="footer-sep">|</span>
+    <a href="https://patriceroblin.com" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+      patriceroblin.com
+    </a>
+  </div>
+</footer>
+
+<script>
+// ─── ACCORDION ───────────────────────────────────────────────
+function toggleSection(id){
+  var t=document.getElementById(id);if(!t)return;
+  var wasOpen=!t.classList.contains('collapsed');
+  document.querySelectorAll('.section').forEach(function(s){
+    if(s.querySelector('.section-header.collapsible'))s.classList.add('collapsed');
+  });
+  if(!wasOpen){
+    t.classList.remove('collapsed');
+    setTimeout(function(){t.scrollIntoView({behavior:'smooth',block:'start'});},50);
+  }
+}
+
+// ─── AUTO RESIZE TEXTAREA ────────────────────────────────────
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+
+// ─── MAPS / WINDY ────────────────────────────────────────────
+function openMaps(e){
+  var loc=document.getElementById('f_location').value.trim();
+  if(loc){
+    e.preventDefault();
+    window.open('https://www.google.com/maps/search/'+encodeURIComponent(loc),'_blank');
+  } else {
+    e.preventDefault();
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(p){
+        window.open('https://www.google.com/maps/@'+p.coords.latitude+','+p.coords.longitude+',15z','_blank');
+      },function(){window.open('https://maps.google.com','_blank');});
+    } else {window.open('https://maps.google.com','_blank');}
+  }
+}
+function openWindy(e){
+  e.preventDefault();
+  var loc=document.getElementById('f_location').value.trim();
+  if(loc){
+    window.open('https://www.windy.com/?'+encodeURIComponent(loc),'_blank');
+  } else {
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(p){
+        window.open('https://www.windy.com/'+p.coords.latitude+'/'+p.coords.longitude+'?wind,10','_blank');
+      },function(){window.open('https://www.windy.com','_blank');});
+    } else {window.open('https://www.windy.com','_blank');}
+  }
+}
+
+// ─── YES/NO BUILDER ──────────────────────────────────────────
+var _ynState={};
+function buildYN(containerId, questions){
+  var el=document.getElementById(containerId);if(!el)return;
+  if(!_ynState[containerId])_ynState[containerId]={};
+  el.innerHTML='';
+  questions.forEach(function(q,i){
+    var key=containerId+'_'+i;
+    var item=document.createElement('div');item.className='yn-item';
+    var row=document.createElement('div');row.className='yn-row';
+    var qEl=document.createElement('span');qEl.className='yn-question';qEl.textContent=q;
+    var btns=document.createElement('div');btns.className='yn-btns';
+    var yBtn=document.createElement('button');yBtn.className='yn-btn';yBtn.textContent='YES';yBtn.dataset.key=key;yBtn.dataset.val='yes';
+    var nBtn=document.createElement('button');nBtn.className='yn-btn';nBtn.textContent='NO';nBtn.dataset.key=key;nBtn.dataset.val='no';
+    if(_ynState[containerId][i]==='yes')yBtn.classList.add('yes');
+    if(_ynState[containerId][i]==='no')nBtn.classList.add('no');
+    yBtn.onclick=function(){setYN(containerId,i,yBtn,nBtn,'yes');};
+    nBtn.onclick=function(){setYN(containerId,i,yBtn,nBtn,'no');};
+    btns.appendChild(yBtn);btns.appendChild(nBtn);
+    row.appendChild(qEl);row.appendChild(btns);
+    item.appendChild(row);el.appendChild(item);
+  });
+}
+function setYN(containerId,idx,yBtn,nBtn,val){
+  if(!_ynState[containerId])_ynState[containerId]={};
+  var cur=_ynState[containerId][idx];
+  if(cur===val){_ynState[containerId][idx]=null;yBtn.classList.remove('yes');nBtn.classList.remove('no');}
+  else{_ynState[containerId][idx]=val;
+    yBtn.classList.toggle('yes',val==='yes');yBtn.classList.toggle('',val!=='yes');
+    nBtn.classList.toggle('no',val==='no');nBtn.classList.toggle('',val!=='no');
+    if(val==='yes'){yBtn.classList.add('yes');nBtn.classList.remove('no');}
+    else{nBtn.classList.add('no');yBtn.classList.remove('yes');}
+  }
+  updateProgress();triggerAutosave();
+}
+
+// ─── CHECKLIST BUILDER ───────────────────────────────────────
+var _checkState={};
+function buildChecklist(containerId, items){
+  var el=document.getElementById(containerId);if(!el)return;
+  if(!_checkState[containerId])_checkState[containerId]={};
+  el.innerHTML='';
+  items.forEach(function(item,i){
+    var div=document.createElement('div');
+    div.className='check-item'+(_checkState[containerId][i]?' checked':'');
+    var box=document.createElement('div');box.className='check-box';
+    var lbl=document.createElement('span');lbl.className='check-label';lbl.textContent=item;
+    div.appendChild(box);div.appendChild(lbl);
+    div.onclick=function(){
+      _checkState[containerId][i]=!_checkState[containerId][i];
+      div.classList.toggle('checked',_checkState[containerId][i]);
+      updateProgress();triggerAutosave();
+    };
+    el.appendChild(div);
+  });
+}
+
+// ─── RISK ASSESSMENT BUILDER ─────────────────────────────────
+var riskData=[{},{},{},{}];
+var riskLabels=['Risk 1','Risk 2','Risk 3','Risk 4'];
+function buildRiskBlocks(){
+  var el=document.getElementById('riskBlocks');if(!el)return;
+  el.innerHTML='';
+  riskLabels.forEach(function(label,i){
+    var block=document.createElement('div');block.className='risk-block';
+    block.innerHTML='<div class="risk-block-title">'+label+'</div>'+
+      riskField('Strategic Theme (operational / legal / financial / resource etc.)','ra_theme_'+i,'input')+
+      riskField('The Risk — what can happen and how','ra_risk_'+i,'textarea')+
+      riskField('Consequence','ra_consequence_'+i,'textarea')+
+      riskField('Existing Controls','ra_controls_'+i,'textarea')+
+      riskField('Additional Risk Treatment Strategies','ra_treatment_'+i,'textarea')+
+      '<div class="risk-level-row">'+
+        '<div class="risk-row"><label>Likelihood</label>'+
+          '<select id="ra_like_'+i+'" onchange="updateRiskBadge('+i+');triggerAutosave()">'+
+            '<option value="">— Select —</option>'+
+            '<option value="1">1 — Rare</option>'+
+            '<option value="2">2 — Unlikely</option>'+
+            '<option value="3">3 — Possible</option>'+
+            '<option value="4">4 — Likely</option>'+
+            '<option value="5">5 — Almost Certain</option>'+
+          '</select>'+
+        '</div>'+
+        '<div class="risk-row"><label>Consequence</label>'+
+          '<select id="ra_cons_'+i+'" onchange="updateRiskBadge('+i+');triggerAutosave()">'+
+            '<option value="">— Select —</option>'+
+            '<option value="1">1 — Insignificant</option>'+
+            '<option value="2">2 — Minor</option>'+
+            '<option value="3">3 — Moderate</option>'+
+            '<option value="4">4 — Major</option>'+
+            '<option value="5">5 — Catastrophic</option>'+
+          '</select>'+
+        '</div>'+
+        '<div class="risk-row"><label>Risk Rating</label><div id="ra_badge_'+i+'" class="risk-badge" style="min-height:28px;"></div></div>'+
+      '</div>';
+    el.appendChild(block);
+    // Restore saved data
+    var d=riskData[i]||{};
+    ['theme','risk','consequence','controls','treatment'].forEach(function(f){
+      var el2=document.getElementById('ra_'+f+'_'+i);
+      if(el2&&d[f]){el2.value=d[f];if(el2.tagName==='TEXTAREA')autoResize(el2);}
+    });
+    var lk=document.getElementById('ra_like_'+i);if(lk&&d.likelihood)lk.value=d.likelihood;
+    var cn=document.getElementById('ra_cons_'+i);if(cn&&d.conseq)cn.value=d.conseq;
+    updateRiskBadge(i);
+    // Add oninput listeners
+    ['theme','risk','consequence','controls','treatment'].forEach(function(f){
+      var el2=document.getElementById('ra_'+f+'_'+i);
+      if(el2){el2.oninput=function(){if(el2.tagName==='TEXTAREA')autoResize(el2);triggerAutosave();};}
+    });
+  });
+}
+function riskField(lbl,id,type){
+  if(type==='textarea')return '<div class="risk-row"><label>'+lbl+'</label><textarea id="'+id+'" placeholder="'+lbl+'…"></textarea></div>';
+  return '<div class="risk-row"><label>'+lbl+'</label><input type="text" id="'+id+'" placeholder="'+lbl+'…"></div>';
+}
+function updateRiskBadge(i){
+  var l=parseInt(document.getElementById('ra_like_'+i).value)||0;
+  var c=parseInt(document.getElementById('ra_cons_'+i).value)||0;
+  var score=l*c;
+  var badge=document.getElementById('ra_badge_'+i);if(!badge)return;
+  if(!score){badge.textContent='';badge.className='risk-badge';return;}
+  var cls,txt;
+  if(score<=4){cls='risk-low';txt='Low ('+score+')';}
+  else if(score<=9){cls='risk-medium';txt='Medium ('+score+')';}
+  else if(score<=15){cls='risk-high';txt='High ('+score+')';}
+  else{cls='risk-extreme';txt='Extreme ('+score+')';}
+  badge.textContent=txt;badge.className='risk-badge '+cls;
+}
+function getRiskData(){
+  var out=[];
+  for(var i=0;i<4;i++){
+    out.push({
+      theme:v('ra_theme_'+i),risk:v('ra_risk_'+i),
+      consequence:v('ra_consequence_'+i),controls:v('ra_controls_'+i),
+      treatment:v('ra_treatment_'+i),
+      likelihood:v('ra_like_'+i),conseq:v('ra_cons_'+i)
+    });
+  }
+  return out;
+}
+
+// ─── CANVAS SKETCH ───────────────────────────────────────────
+var _sk={};
+function _getsk(id){
+  if(!_sk[id])_sk[id]={tool:'pen',color:'#1a3a5c',size:3,drawing:false,startX:0,startY:0,snapshot:null,history:[]};
+  return _sk[id];
+}
+function buildSketch(){
+  var el=document.getElementById('sketchContainer');if(!el)return;
+  var canvasId='mainSketchCanvas';
+  el.innerHTML=
+    '<div class="sketch-wrap">'+
+    '<label class="sketch-label">Site Sketch — layout, flight paths, hazards, zones</label>'+
+    '<a href="https://maps.google.com" target="_blank" class="sketch-maps-link" onclick="if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){this.href=\'https://www.google.com/maps/@\'+p.coords.latitude+\',\'+p.coords.longitude+\',15z\'},function(){})}">'+
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Open Google Maps</a>'+
+    '<div class="sketch-toolbar">'+
+    '<button class="sketch-btn active" id="'+canvasId+'_pen" onclick="sketchSetTool(\''+canvasId+'\',\'pen\')">✏️ Pen</button>'+
+    '<button class="sketch-btn" id="'+canvasId+'_line" onclick="sketchSetTool(\''+canvasId+'\',\'line\')">📏 Line</button>'+
+    '<button class="sketch-btn" id="'+canvasId+'_rect" onclick="sketchSetTool(\''+canvasId+'\',\'rect\')">⬜ Rect</button>'+
+    '<button class="sketch-btn" id="'+canvasId+'_circle" onclick="sketchSetTool(\''+canvasId+'\',\'circle\')">⭕ Circle</button>'+
+    '<button class="sketch-btn" id="'+canvasId+'_arrow" onclick="sketchSetTool(\''+canvasId+'\',\'arrow\')">➡️ Arrow</button>'+
+    '<button class="sketch-btn" id="'+canvasId+'_text" onclick="sketchSetTool(\''+canvasId+'\',\'text\')">🔤 Text</button>'+
+    '<button class="sketch-btn" id="'+canvasId+'_eraser" onclick="sketchSetTool(\''+canvasId+'\',\'eraser\')">🧹 Erase</button>'+
+    '<div class="sketch-color-row">'+
+    ['#1a3a5c','#c0392b','#1d7a4a','#f0a500','#000000','#888888'].map(function(c,i){
+      return '<div class="sketch-color'+(i===0?' active':'')+'" style="background:'+c+'" onclick="sketchSetColor(\''+canvasId+'\',\''+c+'\',this)" title="'+c+'"></div>';
+    }).join('')+
+    '</div>'+
+    '<div class="sketch-size"><span>Size:</span><input type="range" min="1" max="20" value="3" oninput="sketchSetSize(\''+canvasId+'\',this.value)" style="width:70px"></div>'+
+    '<button class="sketch-btn danger" onclick="sketchClear(\''+canvasId+'\')">🗑️ Clear</button>'+
+    '<button class="sketch-btn" onclick="sketchUndo(\''+canvasId+'\')">↩ Undo</button>'+
+    '<button class="sketch-btn" style="margin-left:auto" onclick="sketchSaveToState(\''+canvasId+'\')">💾 Save Sketch</button>'+
+    '</div>'+
+    '<canvas id="'+canvasId+'" class="sketch-canvas" width="820" height="400" style="width:100%;border-radius:8px;touch-action:none"></canvas>'+
+    '<div class="sketch-note">Draw site layout, mark hazards, flight paths and zones. Tap Save Sketch to store.</div>'+
+    '</div>';
+  var canvas=document.getElementById(canvasId);if(!canvas)return;
+  canvas.addEventListener('mousedown',function(e){sketchStart(e,canvasId);});
+  canvas.addEventListener('mousemove',function(e){sketchMove(e,canvasId);});
+  canvas.addEventListener('mouseup',function(e){sketchEnd(e,canvasId);});
+  canvas.addEventListener('mouseleave',function(e){sketchEnd(e,canvasId);});
+  canvas.addEventListener('touchstart',function(e){sketchStart(e,canvasId);},{passive:false});
+  canvas.addEventListener('touchmove',function(e){sketchMove(e,canvasId);},{passive:false});
+  canvas.addEventListener('touchend',function(e){sketchEnd(e,canvasId);},{passive:false});
+}
+function sketchSetTool(id,tool){
+  _getsk(id).tool=tool;
+  ['pen','line','rect','circle','arrow','text','eraser'].forEach(function(t){
+    var btn=document.getElementById(id+'_'+t);
+    if(btn)btn.classList.toggle('active',t===tool);
+  });
+}
+function sketchSetColor(id,color,el){
+  _getsk(id).color=color;
+  var parent=el.parentElement;
+  parent.querySelectorAll('.sketch-color').forEach(function(d){d.classList.remove('active');});
+  el.classList.add('active');
+}
+function sketchSetSize(id,size){_getsk(id).size=parseInt(size);}
+function _getPos(e,canvas){
+  var rect=canvas.getBoundingClientRect();
+  var scaleX=canvas.width/rect.width;var scaleY=canvas.height/rect.height;
+  var src=e.touches?e.touches[0]:e;
+  return{x:(src.clientX-rect.left)*scaleX,y:(src.clientY-rect.top)*scaleY};
+}
+function sketchStart(e,id){
+  e.preventDefault();
+  var canvas=document.getElementById(id);if(!canvas)return;
+  var ctx=canvas.getContext('2d');var sk=_getsk(id);
+  sk.drawing=true;
+  var pos=_getPos(e,canvas);sk.startX=pos.x;sk.startY=pos.y;
+  sk.snapshot=ctx.getImageData(0,0,canvas.width,canvas.height);
+  if(sk.tool==='pen'||sk.tool==='eraser'){ctx.beginPath();ctx.moveTo(pos.x,pos.y);}
+  if(sk.tool==='text'){
+    var txt=prompt('Enter text:');
+    if(txt){sk.history.push(ctx.getImageData(0,0,canvas.width,canvas.height));ctx.font=(sk.size*5+10)+'px sans-serif';ctx.fillStyle=sk.color;ctx.fillText(txt,pos.x,pos.y);sketchSaveToState(id);}
+    sk.drawing=false;
+  }
+}
+function sketchMove(e,id){
+  e.preventDefault();
+  var canvas=document.getElementById(id);if(!canvas)return;
+  var ctx=canvas.getContext('2d');var sk=_getsk(id);if(!sk.drawing)return;
+  var pos=_getPos(e,canvas);
+  ctx.strokeStyle=sk.tool==='eraser'?'#ffffff':sk.color;
+  ctx.lineWidth=sk.tool==='eraser'?sk.size*4:sk.size;
+  ctx.lineCap='round';ctx.lineJoin='round';
+  if(sk.tool==='pen'||sk.tool==='eraser'){ctx.lineTo(pos.x,pos.y);ctx.stroke();}
+  else{
+    ctx.putImageData(sk.snapshot,0,0);ctx.beginPath();
+    if(sk.tool==='line'){ctx.moveTo(sk.startX,sk.startY);ctx.lineTo(pos.x,pos.y);ctx.stroke();}
+    else if(sk.tool==='rect'){ctx.strokeRect(sk.startX,sk.startY,pos.x-sk.startX,pos.y-sk.startY);}
+    else if(sk.tool==='circle'){var rx=Math.abs(pos.x-sk.startX)/2,ry=Math.abs(pos.y-sk.startY)/2;var cx=sk.startX+(pos.x-sk.startX)/2,cy=sk.startY+(pos.y-sk.startY)/2;ctx.ellipse(cx,cy,rx||1,ry||1,0,0,Math.PI*2);ctx.stroke();}
+    else if(sk.tool==='arrow'){var dx=pos.x-sk.startX,dy=pos.y-sk.startY;var angle=Math.atan2(dy,dx);var headLen=15;ctx.moveTo(sk.startX,sk.startY);ctx.lineTo(pos.x,pos.y);ctx.lineTo(pos.x-headLen*Math.cos(angle-Math.PI/6),pos.y-headLen*Math.sin(angle-Math.PI/6));ctx.moveTo(pos.x,pos.y);ctx.lineTo(pos.x-headLen*Math.cos(angle+Math.PI/6),pos.y-headLen*Math.sin(angle+Math.PI/6));ctx.stroke();}
+  }
+}
+function sketchEnd(e,id){
+  var canvas=document.getElementById(id);if(!canvas)return;
+  var ctx=canvas.getContext('2d');var sk=_getsk(id);if(!sk.drawing)return;
+  sk.drawing=false;sk.history.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+  if(sk.history.length>30)sk.history.shift();
+  sketchSaveToState(id);
+}
+function sketchClear(id){
+  var canvas=document.getElementById(id);if(!canvas)return;
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  _getsk(id).history=[];window._sketchData='';triggerAutosave();
+}
+function sketchUndo(id){
+  var canvas=document.getElementById(id);if(!canvas)return;
+  var sk=_getsk(id);sk.history.pop();
+  if(sk.history.length>0)canvas.getContext('2d').putImageData(sk.history[sk.history.length-1],0,0);
+  else canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+}
+function sketchSaveToState(id){
+  var canvas=document.getElementById(id);if(!canvas)return;
+  window._sketchData=canvas.toDataURL('image/png');
+  triggerAutosave();
+}
+function sketchRestoreFromState(dataUrl){
+  if(!dataUrl)return;
+  var canvas=document.getElementById('mainSketchCanvas');if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var img=new Image();img.onload=function(){ctx.drawImage(img,0,0);};img.src=dataUrl;
+  window._sketchData=dataUrl;
+}
+
+// ─── DATA HELPERS ────────────────────────────────────────────
+function v(id){var el=document.getElementById(id);return el?el.value:'';}
+function sv(id,val){var el=document.getElementById(id);if(el){el.value=val||'';if(el.tagName==='TEXTAREA')autoResize(el);}}
+
+// ─── PROGRESS ────────────────────────────────────────────────
+function updateProgress(){
+  var total=0,done=0;
+  // YN sections
+  var ynIds=['yn_jsa','yn_jsaMap'];
+  ynIds.forEach(function(id){
+    var st=_ynState[id]||{};
+    var qCount=(id==='yn_jsa'?jsaQuestions.length:jsaMapQuestions.length);
+    total+=qCount;
+    Object.keys(st).forEach(function(k){if(st[k])done++;});
+  });
+  // Checklist sections
+  var clIds=['cl_beforeDay','cl_beforeFlight','cl_takeoff','cl_crewMission','cl_crewSafety','cl_crewComms','cl_pfSite','cl_pfProps','cl_pfMotors','cl_pfFrame','cl_pfUndercarriage','cl_pfBattery','cl_pfTransmitter','cl_pfPayload','cl_postLanding','cl_postOffice','cl_postProps','cl_postMotors','cl_postFrame','cl_crashProcedure','cl_crashReboot'];
+  clIds.forEach(function(id){
+    var st=_checkState[id]||{};
+    var items=document.getElementById(id)?document.getElementById(id).querySelectorAll('.check-item'):[];
+    total+=items.length;
+    Object.keys(st).forEach(function(k){if(st[k])done++;});
+  });
+  // Fields in sec0
+  var sec0fields=['f_missionName','f_location','f_date','f_pilot'];
+  sec0fields.forEach(function(id){total++;if(v(id))done++;});
+  var pct=total>0?Math.round(done/total*100):0;
+  var fill=document.getElementById('progressFill');
+  var pctEl=document.getElementById('progressPct');
+  if(fill)fill.style.width=pct+'%';
+  if(pctEl)pctEl.textContent=pct+'%';
+}
+
+// ─── AUTOSAVE ────────────────────────────────────────────────
+var _autosaveTimer=null;
+function triggerAutosave(){
+  clearTimeout(_autosaveTimer);
+  _autosaveTimer=setTimeout(function(){autoSave();},1200);
+  updateProgress();
+}
+var _currentName=null;
+function autoSave(){
+  if(!_currentName)return;
+  var missions=getMissions();
+  var idx=missions.findIndex(function(m){return m.name===_currentName;});
+  if(idx<0)return;
+  missions[idx].state=collectState();
+  missions[idx].updated=new Date().toISOString();
+  saveMissions(missions);
+}
+
+// ─── SAVE / LOAD ─────────────────────────────────────────────
+function getMissions(){try{return JSON.parse(localStorage.getItem('rpa_missions')||'[]');}catch(e){return[];}}
+function saveMissions(a){localStorage.setItem('rpa_missions',JSON.stringify(a));}
+
+function collectState(){
+  var state={fields:{},yn:{},checks:{},risk:getRiskData(),sketch:window._sketchData||''};
+  // All input/textarea/select fields
+  document.querySelectorAll('input[id],textarea[id],select[id]').forEach(function(el){
+    if(el.id&&el.id!=='saveName'&&el.id!=='importInput')state.fields[el.id]=el.value;
+  });
+  state.yn=JSON.parse(JSON.stringify(_ynState));
+  state.checks=JSON.parse(JSON.stringify(_checkState));
+  return state;
+}
+
+function restoreState(state){
+  if(!state)return;
+  if(state.fields){
+    Object.keys(state.fields).forEach(function(id){sv(id,state.fields[id]);});
+  }
+  if(state.yn){
+    Object.keys(state.yn).forEach(function(k){_ynState[k]=state.yn[k];});
+    buildYN('yn_jsa',jsaQuestions);
+    buildYN('yn_jsaMap',jsaMapQuestions);
+  }
+  if(state.checks){
+    Object.keys(state.checks).forEach(function(k){_checkState[k]=state.checks[k];});
+    rebuildAllChecklists();
+  }
+  if(state.risk){
+    riskData=state.risk;buildRiskBlocks();
+  }
+  if(state.sketch){
+    setTimeout(function(){sketchRestoreFromState(state.sketch);},100);
+  }
+  updateProgress();
+}
+
+function rebuildAllChecklists(){
+  buildChecklist('cl_beforeDay',beforeDayItems);
+  buildChecklist('cl_beforeFlight',beforeFlightItems);
+  buildChecklist('cl_takeoff',takeoffItems);
+  buildChecklist('cl_crewMission',crewMissionItems);
+  buildChecklist('cl_crewSafety',crewSafetyItems);
+  buildChecklist('cl_crewComms',crewCommsItems);
+  buildChecklist('cl_pfSite',pfSiteItems);
+  buildChecklist('cl_pfProps',pfPropsItems);
+  buildChecklist('cl_pfMotors',pfMotorsItems);
+  buildChecklist('cl_pfFrame',pfFrameItems);
+  buildChecklist('cl_pfUndercarriage',pfUndercarriageItems);
+  buildChecklist('cl_pfBattery',pfBatteryItems);
+  buildChecklist('cl_pfTransmitter',pfTransmitterItems);
+  buildChecklist('cl_pfPayload',pfPayloadItems);
+  buildChecklist('cl_postLanding',postLandingItems);
+  buildChecklist('cl_postOffice',postOfficeItems);
+  buildChecklist('cl_postProps',postPropsItems);
+  buildChecklist('cl_postMotors',postMotorsItems);
+  buildChecklist('cl_postFrame',postFrameItems);
+  buildChecklist('cl_crashProcedure',crashProcedureItems);
+  buildChecklist('cl_crashReboot',crashRebootItems);
+}
+
+function clearAll(){
+  _ynState={};_checkState={};riskData=[{},{},{},{}];window._sketchData='';
+  document.querySelectorAll('input[id],textarea[id],select[id]').forEach(function(el){
+    if(el.id&&el.id!=='importInput')el.value='';
+  });
+  rebuildAllChecklists();
+  buildYN('yn_jsa',jsaQuestions);
+  buildYN('yn_jsaMap',jsaMapQuestions);
+  buildRiskBlocks();
+  buildSketch();
+  updateProgress();
+}
+
+function newMission(){
+  if(!confirm('Start a new mission? Any unsaved changes will be lost.'))return;
+  _currentName=null;
+  clearAll();
+  document.getElementById('f_date').valueAsDate=new Date();
+  document.getElementById('saveName').value='';
+  document.getElementById('sec0').classList.remove('collapsed');
+  window.scrollTo({top:0,behavior:'smooth'});
+  renderSaved(null);
+}
+
+function saveMission(){
+  var name=document.getElementById('saveName').value.trim()||v('f_missionName').trim();
+  if(!name){alert('Please enter a Mission Name in the Save field or Mission Details section.');return;}
+  _currentName=name;
+  var missions=getMissions();
+  var existing=missions.findIndex(function(m){return m.name===name;});
+  var entry={name:name,date:v('f_date')||new Date().toISOString().slice(0,10),updated:new Date().toISOString(),state:collectState()};
+  if(existing>=0){missions[existing]=entry;}else{missions.unshift(entry);}
+  saveMissions(missions);
+  document.getElementById('saveName').value=name;
+  renderSaved(name);
+  var btn=document.getElementById('btnSave');
+  if(btn){btn.textContent='Saved ✓';btn.style.background='var(--success)';setTimeout(function(){btn.textContent='Save Mission';btn.style.background='';},2000);}
+}
+
+function renderSaved(activeName){
+  var missions=getMissions();
+  var list=document.getElementById('loaderList');if(!list)return;
+  if(missions.length===0){list.innerHTML='<div style="font-size:0.82rem;color:var(--muted);padding:8px 0;">No saved missions yet.</div>';return;}
+  list.innerHTML='';
+  missions.forEach(function(m){
+    var row=document.createElement('div');
+    row.className='saved-row'+(m.name===activeName?' active':'');
+    var d=m.date?new Date(m.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'';
+    var upd=m.updated?new Date(m.updated).toLocaleString('en-AU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+    row.innerHTML='<div class="saved-info"><span class="saved-name">'+escHtml(m.name)+'</span><span class="saved-meta">'+d+(upd?' — Saved '+upd:'')+'</span></div>'+
+      '<div class="saved-actions">'+
+      '<button class="saved-btn load" onclick="loadMission(\''+escAttr(m.name)+'\')">Load</button>'+
+      '<button class="saved-btn del" onclick="deleteMission(\''+escAttr(m.name)+'\')">Delete</button>'+
+      '</div>';
+    list.appendChild(row);
+  });
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return String(s).replace(/'/g,'&#39;');}
+
+function toggleLoader(){
+  var list=document.getElementById('loaderList');
+  var btn=document.getElementById('btnLoadMission');
+  if(!list)return;
+  var showing=list.style.display!=='none';
+  list.style.display=showing?'none':'block';
+  if(btn)btn.classList.toggle('active',!showing);
+  if(!showing)renderSaved(_currentName);
+}
+
+function loadMission(name){
+  var missions=getMissions();
+  var m=missions.find(function(x){return x.name===name;});
+  if(!m)return;
+  if(!confirm('Load "'+name+'"? Current unsaved changes will be lost.'))return;
+  clearAll();
+  restoreState(m.state);
+  _currentName=name;
+  document.getElementById('saveName').value=name;
+  document.getElementById('loaderList').style.display='none';
+  document.getElementById('btnLoadMission').classList.remove('active');
+  renderSaved(name);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteMission(name){
+  if(!confirm('Delete "'+name+'"? This cannot be undone.'))return;
+  var missions=getMissions().filter(function(m){return m.name!==name;});
+  saveMissions(missions);
+  if(_currentName===name)_currentName=null;
+  renderSaved(_currentName);
+}
+
+// ─── EXPORT / IMPORT ─────────────────────────────────────────
+function exportMission(){
+  var name=_currentName||v('f_missionName')||'rpa-mission';
+  var data={name:name,exported:new Date().toISOString(),version:'1.0',state:collectState()};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=name.replace(/[^a-zA-Z0-9_-]/g,'-')+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+function importMission(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!data.state)throw new Error('bad');
+      if(!confirm('Load "'+( data.name||'Mission')+'"? This replaces everything on screen.'))return;
+      clearAll();restoreState(data.state);
+      if(data.name){document.getElementById('saveName').value=data.name;_currentName=data.name;}
+      updateProgress();window.scrollTo({top:0,behavior:'smooth'});
+    }catch(err){alert('Could not read that file. Make sure it was exported from this app.');}
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+// ─── PRINT / PDF REPORT ──────────────────────────────────────
+function generateReport(){
+  var name=_currentName||v('f_missionName')||'RPA Mission';
+  var date=v('f_date')||'—';
+  var pilot=v('f_pilot')||'—';
+  var loc=v('f_location')||'—';
+  var client=v('f_client')||'—';
+  var aircraft=v('f_aircraft')||'—';
+
+  function fr(l,val){if(!val)return'';return'<tr><td style="font-weight:600;padding:4px 10px 4px 0;color:#555;white-space:nowrap;vertical-align:top;">'+l+'</td><td style="padding:4px 0;">'+escHtml(val)+'</td></tr>';}
+  function h2(t){return'<h2 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#0099FF;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #e0e8f0;">'+t+'</h2>';}
+  function ynTable(id){
+    var st=_ynState[id]||{};var qs=(id==='yn_jsa'?jsaQuestions:jsaMapQuestions);
+    if(!qs.length)return'';
+    var rows=qs.map(function(q,i){
+      var val=st[i];var badge=val?'<span style="padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:'+(val==='yes'?'#e8f7ee':'#fdf0f0')+';color:'+(val==='yes'?'#1a8048':'#c0392b')+';">'+(val==='yes'?'YES':'NO')+'</span>':'<span style="color:#888;font-size:10px;">—</span>';
+      return'<tr><td style="padding:4px 8px;font-size:12px;">'+escHtml(q)+'</td><td style="padding:4px 8px;text-align:center;">'+badge+'</td></tr>';
+    }).join('');
+    return'<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px;">'+rows+'</table>';
+  }
+  function checkTable(id){
+    var st=_checkState[id]||{};
+    var items=document.getElementById(id)?Array.from(document.getElementById(id).querySelectorAll('.check-label')).map(function(el){return el.textContent;}):[]; 
+    if(!items.length)return'';
+    return'<ul style="margin:0 0 8px;padding-left:18px;font-size:12px;">'+items.map(function(item,i){
+      var done=st[i];
+      return'<li style="padding:2px 0;color:'+(done?'#888':'#111')+';text-decoration:'+(done?'line-through':'none')+';">'+escHtml(item)+'</li>';
+    }).join('')+'</ul>';
+  }
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+escHtml(name)+'</title>';
+  html+='<style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;color:#111;max-width:800px;margin:0 auto;padding:20px;}';
+  html+='table{border-collapse:collapse;}h1{font-size:20px;font-weight:300;margin:0 0 4px;}';
+  html+='.logo{font-size:32px;font-weight:300;letter-spacing:-1px;margin-bottom:4px;}';
+  html+='.blue-line{height:1.5px;background:#0099FF;margin:10px 0;}';
+  html+='</style></head><body>';
+  html+='<div class="logo">REKON<span style="color:#0099FF;">©</span> | RPA CHECKLIST</div>';
+  html+='<div style="font-size:11px;color:#888;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">RPA Flight Operations — Checklist</div>';
+  html+='<div class="blue-line"></div>';
+  html+='<h1>'+escHtml(name)+'</h1>';
+  html+='<table style="margin-bottom:16px;">'+fr('Date',date)+fr('Pilot',pilot)+fr('Location',loc)+fr('Client',client)+fr('Aircraft',aircraft)+'</table>';
+
+  html+=h2('1 — Pilot Log');
+  html+='<table>'+fr('Aircraft',v('pl_aircraft'))+fr('Pilot',v('pl_pilot'))+fr('Crew',v('pl_crew'))+fr('Route/Remarks',v('pl_route'))+fr('Skill Rating',v('pl_skill'))+fr('Wind (Kp)',v('pl_windKp'))+fr('Wind Speed',v('pl_windSpeed'))+fr('Gusts',v('pl_gusts'))+fr('RPA Reg #',v('pl_rpaReg'))+fr('Battery #',v('pl_battery'))+fr('Flight Hours',v('pl_flightHours'))+fr('Total Hours',v('pl_totalHours'))+'</table>';
+
+  html+=h2('2 — Pre-Op Briefing');
+  html+='<table>'+fr('Objectives',v('pb_objectives'))+fr('Proximity to Airfield',v('pb_airfield'))+fr('Threats/Risks',v('pb_threats'))+fr('Weather Forecast',v('pb_weather'))+fr('Craft',v('pb_craft'))+fr('Craft Limits',v('pb_limits'))+fr('Emergency Landing Areas',v('pb_emergencyLanding'))+fr('Emergency Contacts',v('pb_emergencyContacts'))+'</table>';
+
+  html+=h2('3 — Job Safety Assessment');
+  html+=ynTable('yn_jsa');
+  if(v('n_jsa'))html+=fr('Notes',v('n_jsa'));
+
+  html+=h2('4 — Mission Checklist');
+  html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Before the Day</strong>'+checkTable('cl_beforeDay');
+  html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Immediately Before Flight</strong>'+checkTable('cl_beforeFlight');
+  html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Take Off</strong>'+checkTable('cl_takeoff');
+  if(v('n_mission'))html+=fr('Notes',v('n_mission'));
+
+  html+=h2('5 — JSA with Map & Site Mapping');
+  html+=ynTable('yn_jsaMap');
+  html+='<table>'+fr('NOTAMs',v('jm_notams'))+fr('Wind Speed',v('jm_wind'))+fr('Gusts',v('jm_gusts'))+fr('Temperature',v('jm_temp'))+fr('Permissions',v('jm_permissions'))+fr('Closest Aerodrome',v('jm_aerodrome'))+'</table>';
+  html+='<table>'+fr('Warning Signs',v('jm_signs'))+fr('Barriers',v('jm_barriers'))+fr('Exclusion Zones',v('jm_exclusion'))+fr('Flight Path',v('jm_flightPath'))+fr('Work Path',v('jm_workPath'))+fr('TO/LDG Location',v('jm_toLanding'))+fr('Spotter Position',v('jm_spotter'))+fr('Obstructions',v('jm_obstructions'))+fr('Public Access',v('jm_publicAccess'))+fr('Emergency LDG',v('jm_emergLanding'))+fr('Hazard Locations',v('jm_hazards'))+fr('Safe Zone',v('jm_safeZone'))+fr('Site Notes',v('jm_siteNotes'))+'</table>';
+  if(window._sketchData)html+='<div style="margin-top:10px;"><strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Site Sketch</strong><br><img src="'+window._sketchData+'" style="max-width:100%;border:1px solid #e0e8f0;border-radius:4px;margin-top:6px;"></div>';
+
+  html+=h2('6 — Risk Assessment');
+  getRiskData().forEach(function(r,i){
+    if(!r.risk&&!r.theme)return;
+    html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Risk '+(i+1)+'</strong>';
+    html+='<table style="margin-bottom:10px;">'+fr('Theme',r.theme)+fr('Risk',r.risk)+fr('Consequence',r.consequence)+fr('Controls',r.controls)+fr('Treatment',r.treatment)+fr('Likelihood',r.likelihood)+fr('Consequence Level',r.conseq)+'</table>';
+  });
+
+  html+=h2('7 — Crew Induction');
+  html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">The Mission</strong>'+checkTable('cl_crewMission');
+  html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Safety</strong>'+checkTable('cl_crewSafety');
+  html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Communication</strong>'+checkTable('cl_crewComms');
+
+  html+=h2('8 — Pre-Flight Inspection');
+  ['Site & Safety:cl_pfSite','Propellers:cl_pfProps','Motors:cl_pfMotors','Frame:cl_pfFrame','Undercarriage:cl_pfUndercarriage','Battery:cl_pfBattery','Transmitter:cl_pfTransmitter','Payload:cl_pfPayload'].forEach(function(pair){
+    var parts=pair.split(':');
+    html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">'+parts[0]+'</strong>'+checkTable(parts[1]);
+  });
+
+  html+=h2('9 — Post-Flight');
+  ['Upon Landing:cl_postLanding','In the Office:cl_postOffice','Propellers:cl_postProps','Motors:cl_postMotors','Frame & Battery:cl_postFrame'].forEach(function(pair){
+    var parts=pair.split(':');
+    html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">'+parts[0]+'</strong>'+checkTable(parts[1]);
+  });
+
+  html+=h2('10 — Post-Crash');
+  html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Post-Crash Procedure</strong>'+checkTable('cl_crashProcedure');
+  html+='<strong style="font-size:11px;color:#0099FF;text-transform:uppercase;letter-spacing:0.08em;">Re-Booting</strong>'+checkTable('cl_crashReboot');
+  if(v('n_crash'))html+=fr('Incident Notes',v('n_crash'));
+
+  html+='<div style="margin-top:30px;padding-top:14px;border-top:1px solid #e0e8f0;font-size:10px;color:#888;text-align:center;">&copy; 2026 Patrice Roblin | +61 0402 096 781 | roblinpatrice@gmail.com | patriceroblin.com</div>';
+  html+='</body></html>';
+
+  var rw=window.open('','_blank');
+  if(rw){rw.document.open();rw.document.write(html);rw.document.close();}
+  else{var iframe=document.getElementById('reportFrame');if(!iframe){iframe=document.createElement('iframe');iframe.id='reportFrame';iframe.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:99999;background:white;';document.body.appendChild(iframe);}iframe.style.display='block';iframe.contentDocument.open();iframe.contentDocument.write(html);iframe.contentDocument.close();}
+}
+
+// ─── CHECKLIST DATA ──────────────────────────────────────────
+var jsaQuestions=[
+  'Maps and charts available and checked (sketch of area if required)',
+  'Weather within limits for machine and operation',
+  'NOTAMs submitted (if required)',
+  'NOTAMs checked',
+  'Possibility of public moving into area — assessed',
+  'Footpath / right of way identified',
+  'Landing area including alternate identified',
+  'Ability to maintain 30m from public',
+  'Obstructions identified (buildings / trees etc)',
+  'Possible interference identified (power lines / antennas)',
+  'Ability to maintain visual line of sight',
+  'Controller ability matches location and task',
+  'Permission of any landowners / stakeholders obtained',
+  'Privacy considered',
+  'Local restrictions / by-laws checked',
+  'Need for signage assessed'
+];
+var jsaMapQuestions=jsaQuestions.slice(0,16);
+
+var beforeDayItems=[
+  'Obtain permissions / approvals',
+  'Pre-notification to stakeholders',
+  'Job Safety Analysis completed',
+  'RPA status confirmed — hired, owned, or new',
+  'Firmware updated',
+  'Apps updated',
+  'Locational check completed',
+  'Crew confirmed and briefed',
+  'Flight route planned',
+  'Shot list or story board prepared',
+  'Check NOTAMs',
+  'Check weather',
+  'RPA batteries charged',
+  'Controller battery charged',
+  'Device charged',
+  'SD card formatted',
+  'Equipment packed',
+  'First aid equipment packed',
+  'Signs and barriers packed',
+  'PPE equipment packed'
+];
+var beforeFlightItems=[
+  'Locational check',
+  'Check wind speed',
+  'Set up take-off / landing site',
+  'Identify alternative landing site',
+  'Set up signage and barriers',
+  'Brief crew',
+  'Set home point and RTH height',
+  'Conduct pre-flight checklist',
+  'Lens cover removed',
+  'Gimbal spacer removed',
+  'SD card inserted in RPA',
+  'Check satellite connection',
+  'Compass calibrated',
+  'Correct flight mode selected',
+  'Batteries at correct temperature',
+  'Antennas set correctly'
+];
+var takeoffItems=[
+  'Turn on controller',
+  'Turn on RPA',
+  'Ensure in correct mode',
+  'Press record',
+  'Hover check completed',
+  'Check all controls are responsive'
+];
+var crewMissionItems=[
+  'Mission brief detailing flight plan and mission as planned',
+  'Roles and responsibilities of all crew members',
+  'Where crew members will be located and their movement throughout the mission',
+  'Potential hazards at the mission site',
+  'Expectation of environmental aspects: rain, wind, sun, terrain, vegetation',
+  'Emergency procedures',
+  'Contingency procedures',
+  'Identification of alternate landing area',
+  'Identification of a safe zone'
+];
+var crewSafetyItems=[
+  'Location of first aid equipment',
+  'Location of safety equipment',
+  'Emergency numbers and contacts',
+  'The role of crew member when an incident occurs',
+  'PPE'
+];
+var crewCommsItems=[
+  'Radio, phone or face-to-face communication',
+  'Verbal and non-verbal communication',
+  'Communication in the event of public entering mission area',
+  'Communication with public',
+  'Communication in the event of an emergency in the mission area',
+  'Communication in the event of impending bird attack',
+  'Communication in the event of animals that may impact on the mission',
+  'Communication regarding other hazards'
+];
+var pfSiteItems=[
+  'Safety equipment present',
+  'Signage in place',
+  'Barriers in place',
+  'PPE worn',
+  'Location check completed',
+  'Safe take-off / landing site confirmed',
+  'Alternate landing site identified',
+  'Obstructions noted',
+  'Public assessed',
+  'Animals assessed',
+  'Vehicles assessed',
+  'Other hazards assessed',
+  'Meteorological conditions acceptable'
+];
+var pfPropsItems=['Condition checked','Tightness checked','Dents on leading edges checked','Cracks or signs of stress checked','Correct orientation confirmed'];
+var pfMotorsItems=['Check for free movement','No abnormal movement','Check for abnormal noise'];
+var pfFrameItems=['Screws located and tight','Check for cracks or damage','Check for security'];
+var pfUndercarriageItems=['Check for security','Check for damage'];
+var pfBatteryItems=['Charged','Condition checked','Not swollen','Inserted correctly','Terminals clean','Lights functioning'];
+var pfTransmitterItems=['Check levers and switches','Aerial checked for damage','Aerial in position for flight','Battery charged','Screen securely fitted','Screen has adequate power','Screen programmed correctly','Sufficient storage space available'];
+var pfPayloadItems=['Check for correct function','Check for damage','Confirm secure','Confirm in correct mode'];
+var postLandingItems=['Camera off','Disarm RPA','Disarm remote controller','Power off additional equipment','Disconnect battery','Lens cover on','Gimbal lock on','Conduct post-flight check for serviceability','Wipe RPA body and propellers','Blow dust out of components and motor','Place all gear in storage containers'];
+var postOfficeItems=['Upload video footage to computer','Clear media cards and storage','Document flight performance details','Complete flight logbook','Recharge and log battery usage'];
+var postPropsItems=['Condition checked','Dents on leading edges checked','Cracks or signs of stress checked'];
+var postMotorsItems=['Check for free movement','No abnormal movement confirmed','Check for heat','Check for cracks or damage','Check for security'];
+var postFrameItems=['Frame: check for security','Frame: check for damage','Battery: heat checked','Battery: condition checked','Battery: checked for swelling'];
+var crashProcedureItems=[
+  'Retrieve the drone',
+  'Shut off the RPA battery',
+  'Shut off remote controller',
+  'Remove the battery and props from RPA',
+  'Check the battery for structural damage',
+  'Check for cracks or damage — replace props showing signs of damage',
+  'Clean all dirt / sand / debris using alcohol wipes',
+  'Manually turn motors (RPA upside down) to dislodge dirt, then blow with compressed air',
+  'Check gimbal range of motion, bent parts or cracks',
+  'Check camera for cracks or loose wires',
+  'Check all gimbal pads and drop protectors — securely seated and intact',
+  'Check entire frame for cracks including landing gear',
+  'Check every motor is correctly seated and not loose (including all screws)',
+  'Blow sand / debris / dust out of every moving part'
+];
+var crashRebootItems=[
+  'Re-insert the battery into the RPA',
+  'Re-boot the RPA on a flat surface — let it complete start-up procedure',
+  'Calibrate the compass then the IMU',
+  'Check the gimbal for full range of motion',
+  'Start the motors without props — check for wobble',
+  'Shutdown, attach props, restart motors, re-check for wobble',
+  'Hover just above eye-level — check for strange movement or vibrations',
+  'While recording, perform basic manoeuvres (forward, backward, left, right, yaw, up, down)',
+  'Review the video — check for additional shakiness',
+  'Perform one long-distance flight low and slow (not over water) to confirm all systems working'
+];
+
+// ─── INIT ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  buildYN('yn_jsa',jsaQuestions);
+  buildYN('yn_jsaMap',jsaMapQuestions);
+  rebuildAllChecklists();
+  buildRiskBlocks();
+  buildSketch();
+  document.getElementById('f_date').valueAsDate=new Date();
+  updateProgress();
+  renderSaved(null);
+
+  document.addEventListener('input',function(e){
+    if(e.target.tagName==='TEXTAREA'){autoResize(e.target);}
+    triggerAutosave();
+  });
+});
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw-rpa.js');
+}
+</script>
+</body>
+</html>
